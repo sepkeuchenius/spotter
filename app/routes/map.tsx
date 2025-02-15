@@ -2,8 +2,8 @@ import React, { useRef, useEffect, useState } from 'react'
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import Map, { Marker, Popup } from 'react-map-gl/mapbox';
-import { BookOpenIcon, CheckCircleIcon, ClockIcon, FolderOpenIcon, GroupIcon, MapIcon, PlusCircleIcon, PlusIcon, SearchIcon } from 'lucide-react';
+import Map, { MapMouseEvent, Marker, Popup, useMap, MapEvent } from 'react-map-gl/mapbox';
+import { BookIcon, BookOpenIcon, CheckCircleIcon, CircleDotIcon, ClockIcon, FolderOpenIcon, GroupIcon, LogInIcon, MapIcon, PlusCircleIcon, PlusIcon, SearchIcon } from 'lucide-react';
 import { useFetcher } from '@remix-run/react';
 import { loader } from './search';
 
@@ -14,19 +14,31 @@ export default function MapComponent() {
     const markers = [
         { lng: 5.244122, lat: 52.086500 },
     ]
-    const [visibleSpots, setVisibleSpots] = useState<Spot[]>([{
+    const spot = {
         title: "Food Truck", description: "This is an amazing food truck", location: {
             lng: 5.244122, lat: 52.086500
         }
-    }]);
+    }
 
+    const [showAddSpotDialogue, setShowAddSpotDialogue] = useState(false);
+
+    const addSpot = (e: MapMouseEvent) => {
+        // TODO: check if spot has been added
+        setShowAddSpotDialogue(true);
+    }
+
+
+    const [currentSpots, setCurrentSpots] = useState([spot]);
     return (
         <>
             {/* <div id='map-container' ref={mapContainerRef} /> */}
-            <Search setVisibleSpots={setVisibleSpots} />
+            <Search setCurrentSpot={setCurrentSpots} />
             <Logo />
             <SideBar />
             <AddSpot />
+            {showAddSpotDialogue ?
+                    <AddSpotDialogue />: null
+            }
             <Map
                 mapboxAccessToken="pk.eyJ1Ijoic2Vwa2V1Y2hlbml1cyIsImEiOiJjbTZ6aGk0NjQwNDFrMnNzODczazlsOXpqIn0.iOGt8AgxCQeelSz9XKWw5g"
                 initialViewState={{
@@ -36,10 +48,9 @@ export default function MapComponent() {
                 }}
                 style={{ width: "100vw", height: "100vh" }}
                 mapStyle="mapbox://styles/mapbox/streets-v9"
+                onClick={addSpot}
             >
-                {visibleSpots.map((spot)=>{
-                    <MapSpot spot={spot} />
-                })}
+                {currentSpots.map((spot) => { return <MapSpot spot={spot}></MapSpot> })}
 
 
             </Map>
@@ -47,44 +58,57 @@ export default function MapComponent() {
     )
 }
 
-function MapSpot({spot}: {spot: Spot}) {
-    const popupRef = useRef<any>();
-    const [showPopup, setShowPopup] = useState(true)
-    return <>
+function AddSpotDialogue() {
+    const addSpotFetcher = useFetcher<typeof loader>();
+    return <div className='absolute w-full h-full top-0 left-0 z-10 flex justify-center items-center'>
+        <addSpotFetcher.Form className='bg-slate-200 rounded-l p-5 flex flex-col items-center justify-center add-spot-dialog' style={{ width: '300px', height: '400px' }}>
 
+        </addSpotFetcher.Form>
+
+    </div>
+}
+
+
+function MapSpot({ spot }: { spot: Spot }) {
+    const popupRef = useRef<any>();
+    const [showPopup, setShowPopup] = useState(false)
+
+    return <div className='z-10'>
         <Popup longitude={spot.location.lng}
             ref={popupRef}
             style={{ borderRadius: '10px' }}
             latitude={spot.location.lat}
-            onClose={() => { setShowPopup(false) }}
+            onClose={() => { console.log("test2") }}
         >
-            <div className='bg-slate-800 rounded text-white flex flex-col p-4' style={{ width: '300px', height: '400px' }}>
-                <h1 className='text-xl font-bold '>Century old Oak</h1>
-            </div>
+            {showPopup ?
+                <div className='bg-slate-800 rounded text-white flex flex-col p-4' style={{ width: '300px', height: '400px' }}>
+                    <h1 className='text-xl font-bold '>{spot.title}</h1>
+                </div> : null}
         </Popup>
-
         <Marker
             longitude={spot.location.lng} popup={popupRef.current}
-            latitude={spot.location.lat} onClick={() => { setShowPopup(true) }} />
+            latitude={spot.location.lat} onClick={(e) => { e.originalEvent.preventDefault(); console.log('test'); setShowPopup(true) }}
+            color='green'
+        >
+            <CircleDotIcon className='animate-ping'/>
 
-    </>
+        </Marker>
+
+    </div>
 
 }
 
-function Search({setVisibleSpots}: {setVisibleSpots: any}) {
+function Search({ setCurrentSpot }: { setCurrentSpot: any }) {
     const searchFetcher = useFetcher<typeof loader>();
     const [searchResults, setSearchResults] = useState<Spot[]>([]);
     const [showResults, setShowResults] = useState(false);
     React.useEffect(() => {
-        searchFetcher.data && setSearchResults(searchFetcher.data) && setVisibleSpots(searchFetcher.data);
-    }, [searchFetcher]);
-    React.useEffect(()=>{
-        setVisibleSpots(searchResults);
-    }, [searchResults]);
+        if (searchFetcher.data && searchFetcher.data.length > 0) { setSearchResults(searchFetcher.data); setCurrentSpot(searchFetcher.data) }
+    }, [searchFetcher])
     return (
         <div className='absolute z-10 w-full flex flex-col justify-center top-2 items-center' onMouseLeave={() => { setShowResults(false) }} onClick={() => { setShowResults(true) }}>
             <searchFetcher.Form onSubmit={() => { setShowResults(true) }} className='p-4 w-1/2 flex justify-center items-center relative' method='get' action='/search'>
-                <input type='text' placeholder='Search for a spot...' className='w-full mx-auto p-4 text-xl rounded-xl border bg-slate-800 border-slate-300 rounded text-white' />
+                <input type='text' placeholder='Search for a spot...' className='w-full mx-auto p-3 text-xl rounded-l border bg-slate-800 border-slate-300 rounded text-white' />
                 <SearchIcon color='white' className='absolute right-10' />
             </searchFetcher.Form>
             <SearchResults results={searchResults} showResults={showResults} />
@@ -135,8 +159,8 @@ function SideBar() {
             <div className='mt-40 flex flex-col align-end items-bottom gap-2'>
                 <SidebarButton><MapIcon />Map</SidebarButton>
                 <SidebarButton><GroupIcon />Groups</SidebarButton>
-                <SidebarButton>Pages</SidebarButton>
-                <SidebarButton>Login</SidebarButton>
+                <SidebarButton><BookIcon /> Pages</SidebarButton>
+                <SidebarButton><LogInIcon />Login</SidebarButton>
 
             </div>
 
@@ -168,7 +192,6 @@ export interface Spot {
 
 function SearchResult(result: Spot) {
     return (
-        <>
         <div className='bg-slate-400 hover:bg-slate-600 text-white flex flex-row p-4 w-full cursor-pointer justify-between items-center rounded'>
             <div className='flex flex-col justify-between'>
                 <h1 className='text-xl font-bold '>{result.title}</h1>
@@ -176,7 +199,6 @@ function SearchResult(result: Spot) {
             </div>
             <FolderOpenIcon />
         </div>
-        </>
     )
 
 }
