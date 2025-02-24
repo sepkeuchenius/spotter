@@ -1,19 +1,14 @@
+import { PrismaClient } from "@prisma/client";
 import { Spot } from "./map";
+import { LoaderFunctionArgs } from "@remix-run/node";
 
-export async function loader() {
-    return [{
-        title: "test Truck", description: "test is an amazing food truck", location: {
-            lng: 5.244122, lat: 52.086100
-        }
-    },
-    {
-        title: "test Truck", description: "test is an amazing food truck", location: {
-            lng: 5.243122, lat: 52.086500
-        }
-    },
-    {
-        title: "test Truck", description: "test is an amazing food truck", location: {
-            lng: 5.245322, lat: 52.086500
-        }
-    }] as Spot[];
+export async function loader(args: LoaderFunctionArgs) {
+    const { request, params } = args;
+    const queryParams = new URL(request.url).searchParams;
+    const searchQuery = queryParams.get('query');
+    console.log(searchQuery)
+    const client = new PrismaClient();
+    return await client.spot.findMany({ take: 20 }).then((spots) => {
+        return spots.map((spot) => { return { title: spot.name, description: spot.description, location: { lng: spot.lng, lat: spot.lat } } as Spot }).filter((spot: Spot) => spot.title.includes(searchQuery)|| spot.description.includes(searchQuery));
+    })
 }
