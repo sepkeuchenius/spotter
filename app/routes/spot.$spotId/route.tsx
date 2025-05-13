@@ -4,19 +4,22 @@ import { useLoaderData } from "@remix-run/react";
 import Map, { Marker } from 'react-map-gl/mapbox';
 import { MapPinIcon } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
-
+import { Accent } from "~/components/accent";
 export async function loader(params: LoaderFunctionArgs) {
     const spotId = params.params.spotId;
     if (!spotId) {
-        return json({ error: "Spot ID is required" }, { status: 400 });
+        return Response.json({ error: "Spot ID is required" }, { status: 400 });
     }
     const prisma = new PrismaClient();
     const spot = await prisma.spot.findUnique({
         where: {
             id: parseInt(spotId)
+        },
+        include: {
+            author: true
         }
     });
-    return { spot: spot }
+    return { spot }
 }
 
 export default function User() {
@@ -36,7 +39,7 @@ export default function User() {
             <div className='bg-white p-4 border-b'>
                 <div className='max-w-4xl'>
                     <h1 className='text-2xl font-bold'>{spot.name}</h1>
-                    <p>Added by {spot.author} at {spot.createdAt.toLocaleString()}</p>
+                    <p>Added by <Accent>{spot.author.name}</Accent> at <Accent>{spot.createdAt.toLocaleString()}</Accent></p>
                 </div>
             </div>
 

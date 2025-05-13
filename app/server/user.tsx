@@ -1,7 +1,7 @@
-import { ActionFunctionArgs, redirect } from "@remix-run/node"
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr"
+import { PrismaClient, User } from "@prisma/client"
 
-export async function loader({ request }: ActionFunctionArgs) {
+export async function getUser(request: Request): Promise<User | null> {
     const headers = new Headers()
     const supabase = createServerClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
         cookies: {
@@ -14,12 +14,17 @@ export async function loader({ request }: ActionFunctionArgs) {
                 )
             },
         }
-    })
+    })  
 
-    await supabase.auth.signOut();
-    console.log('signed out');
-
-    return redirect('/login', {
-        headers
+    const { data: { user } } = await supabase.auth.getUser();
+    if(!user) {
+        return null
+    }
+    const prisma = new PrismaClient()
+    const dbUser = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        }
     })
+    return dbUser
 }

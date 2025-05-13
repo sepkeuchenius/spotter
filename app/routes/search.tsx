@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { Spot } from "./map";
+import { Spot } from "./_index";
 import { LoaderFunctionArgs } from "@remix-run/node";
 
 export async function loader(args: LoaderFunctionArgs) {

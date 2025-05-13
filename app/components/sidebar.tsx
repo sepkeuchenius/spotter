@@ -1,18 +1,19 @@
 import { BookIcon, GroupIcon, LogInIcon, LogOutIcon, MapIcon } from "lucide-react";
 import { Logo } from "./logo";
-import { Form } from "@remix-run/react";
+import { Form, useNavigate } from "@remix-run/react";
 
 export function SideBar() {
+    const navigate = useNavigate()
     return (
         <div className=' h-full left-0 top-0 bg-slate-100 z-10 flex flex-col p-3 justify-between' style={{ width: 300 }}>
             <Logo />
             .
             <div className='mt-40 flex flex-col align-end items-bottom gap-2'>
-                <SidebarButton><MapIcon />Map</SidebarButton>
-                <SidebarButton><GroupIcon />Groups</SidebarButton>
-                <SidebarButton><BookIcon /> Pages</SidebarButton>
-                <SidebarButton><LogInIcon />Login</SidebarButton>
-                <SidebarButton><Form method="post" action="/logout"><button type="submit" className="flex flex-row gap-2"><LogOutIcon />Logout</button></Form></SidebarButton>
+                <SidebarButton onClick={() => navigate('/')}><MapIcon />Map</SidebarButton>
+                <SidebarButton onClick={() => navigate('/groups')}><GroupIcon />Groups</SidebarButton>
+                <SidebarButton onClick={() => navigate('/pages')}><BookIcon /> Pages</SidebarButton>
+                <SidebarButton onClick={() => navigate('/login')}><LogInIcon />Login</SidebarButton>
+                <SidebarButton onClick={() => navigate('/logout')}><LogOutIcon />Logout</SidebarButton>
             </div>
 
         </div>

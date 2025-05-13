@@ -11,10 +11,13 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
+  id    String     @id
   email String  @unique
   name  String?
   spots Spot[]
+  memberOf Group[] @relation("GroupMembers")
+  adminOf Group[] @relation("GroupAdmins")
+  createdGroups Group[] @relation("GroupCreated")
 }
 
 model Spot {
@@ -25,5 +28,19 @@ model Spot {
   lat         Float
   createdAt   DateTime @default(now())
   author      User     @relation(fields: [authorId], references: [id])
-  authorId    Int      @default(0)
+  authorId    String
+  group       Group?   @relation(fields: [groupId], references: [id])
+  groupId     String?
+}
+
+model Group {
+  id    String     @id @default(uuid())
+  name  String
+  spots Spot[]
+  createdBy User     @relation("GroupCreated", fields: [createdById], references: [id])
+  createdById String
+  description String
+  admins User[] @relation("GroupAdmins")
+  members User[] @relation("GroupMembers")
+  createdAt DateTime @default(now())
 }
