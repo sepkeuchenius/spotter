@@ -14,6 +14,7 @@ import { Spinner } from '~/components/spinner';
 import { getUser } from '~/server/user';
 import { LoaderFunctionArgs } from '@remix-run/node';
 import { Search } from '~/components/search';
+import { prisma } from '~/utils/db.server';
 
 export type SpotWithAuthorAndGroup = Spot & {
     author: User
@@ -21,7 +22,6 @@ export type SpotWithAuthorAndGroup = Spot & {
 }
 
 export async function loader({request}: LoaderFunctionArgs){
-    const prisma = new PrismaClient();
     const dbSpots = await prisma.spot.findMany({
         take: 20,
         include: {

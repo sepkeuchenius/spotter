@@ -42,5 +42,5 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() { 
-  return <div className="flex flex-row h-full"><SideBar /><Outlet /></div>;
+  return <div className="flex flex-row h-full dark:bg-slate-700"><SideBar /><Outlet /></div>;
 }

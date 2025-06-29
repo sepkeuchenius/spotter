@@ -1,22 +1,10 @@
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
 import { json, LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useActionData, useNavigation, Form, redirect, useNavigate } from "@remix-run/react";
+import { getSupabase } from "~/utils/supabase.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-    const headers = new Headers()
-
-    const supabase = createServerClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
-      cookies: {
-        getAll() {
-          return parseCookieHeader(request.headers.get('Cookie') ?? '')
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            headers.append('Set-Cookie', serializeCookieHeader(name, value, options))
-          )
-        },
-      },
-    })
+    const supabase = await getSupabase(request, request.headers)
     
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -28,31 +16,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
     console.log(session);
   
     return new Response('...', {
-      headers,
+      headers: request.headers,
     })
   
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-    const headers = new Headers()
-    const supabase = createServerClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
-        cookies: {
-            getAll() {
-                return parseCookieHeader(request.headers.get('Cookie') ?? '')
-            },
-            setAll(cookiesToSet) {
-                cookiesToSet.forEach(({ name, value, options }) =>
-                    headers.append('Set-Cookie', serializeCookieHeader(name, value, options))
-                )
-            },
-        }
-    })
+    const supabase = await getSupabase(request, request.headers)
+
 
     const formData = await request.formData()
     const email = formData.get('email')
     const password = formData.get('password')
 
-    const { error, data: {user} } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
         email: email as string,
         password: password as string
     })
@@ -62,7 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     return redirect('/', {
-        headers
+        headers: request.headers,
     })
     
 }

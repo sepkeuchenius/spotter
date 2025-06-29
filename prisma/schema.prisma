@@ -18,6 +18,7 @@ model User {
   memberOf Group[] @relation("GroupMembers")
   adminOf Group[] @relation("GroupAdmins")
   createdGroups Group[] @relation("GroupCreated")
+  comments Comment[]
 }
 
 model Spot {
@@ -31,6 +32,7 @@ model Spot {
   authorId    String
   group       Group?   @relation(fields: [groupId], references: [id])
   groupId     String?
+  comments Comment[]
 }
 
 model Group {
@@ -43,4 +45,14 @@ model Group {
   admins User[] @relation("GroupAdmins")
   members User[] @relation("GroupMembers")
   createdAt DateTime @default(now())
+}
+
+model Comment {
+  id String @id @default(uuid())
+  content String
+  createdAt DateTime @default(now())
+  author User @relation(fields: [authorId], references: [id])
+  authorId String
+  spot Spot @relation(fields: [spotId], references: [id])
+  spotId Int
 }

@@ -2,7 +2,7 @@ import { ActionFunctionArgs, redirect } from "@remix-run/node";
 import { Spot } from "./_index";
 import { PrismaClient } from "@prisma/client";
 import { getUser } from "../server/user";
-
+import { prisma } from "~/utils/db.server";
 
 export async function action(args: ActionFunctionArgs) {
     const user = await getUser(args.request)
@@ -12,7 +12,6 @@ export async function action(args: ActionFunctionArgs) {
     }
     if (args.request.body) {
         const data = await args.request.formData()
-        const prisma = new PrismaClient();
         const dbSpots = await prisma.spot.create({
             data: {
                 name: data.get('name') as string,

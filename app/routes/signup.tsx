@@ -1,22 +1,11 @@
 import { ActionFunctionArgs, redirect } from "@remix-run/node"
-import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr"
 import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { PrismaClient } from "@prisma/client";
+import { getSupabase } from "~/utils/supabase.server";
+import { prisma } from "~/utils/db.server";
 
 export async function action({ request }: ActionFunctionArgs) {
     const headers = new Headers()
-    const supabase = createServerClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
-        cookies: {
-            getAll() {
-                return parseCookieHeader(request.headers.get('Cookie') ?? '')
-            },
-            setAll(cookiesToSet) {
-                cookiesToSet.forEach(({ name, value, options }) =>
-                    headers.append('Set-Cookie', serializeCookieHeader(name, value, options))
-                )
-            },
-        }
-    })
+    const supabase = await getSupabase(request, headers)
 
     const formData = await request.formData()
     const email = formData.get('email')
@@ -35,7 +24,6 @@ export async function action({ request }: ActionFunctionArgs) {
         return Response.json({ error: error.message }, { status: 400 })
     }
 
-    const prisma = new PrismaClient()
     if (user) {
         const dbUser = await prisma.user.create({
             data: {
