@@ -75,7 +75,6 @@ export default function MapComponent() {
                 onResultsChange={setCurrentSpots} 
                 className="absolute z-10 top-2" 
             />
-            <Logo />
             <AddSpot addingSpot={addingSpot} setAddingSpot={setAddingSpot} />
             {showAddSpotDialogue && addingSpot=='adding' ?
                 <AddSpotDialogue lat={spotCoordinates.lat} lng={spotCoordinates.lng} x={spotDialogCoordinates.x} y={spotDialogCoordinates.y} setAddingSpot={setAddingSpot} /> : null
@@ -107,109 +106,207 @@ function AddSpotDialogue({ lng, lat, x, y, setAddingSpot }: { lng: number, lat: 
     const [currentDialogState, setCurrentDialogState] = useState(dialogStates[0]);
     const [spotName, setSpotName] = useState('');
     const addSpotFetcher = useFetcher<typeof loader>();
-    return <div className='absolute z-10 flex justify-center items-center shadow-xl' style={{ left: x, top: y }}>
-        <addSpotFetcher.Form
-            method='POST'
-            action='/add-spot'
-            className='bg-slate-100 rounded-l p-0 flex flex-col justify-between add-spot-dialog' style={{ width: '300px', height: '400px' }}>
-            <input type='hidden' name='lng' value={lng} />
-            <input type='hidden' name='lat' value={lat} />
-            <div className='w-full border-1 border-slate-500 px-5 py-4 bg-green-200 shadow'>
-                <h1 className='text-xl flex flex-row gap-2'><PlusCircleIcon />Add a spot</h1>
-            </div>
-            {addSpotFetcher.state == 'idle' ?
-                <>
-                    <AddSpotName currentDialogState={currentDialogState} setCurrentDialogState={setCurrentDialogState} setAddingSpot={setAddingSpot}/>
-                    <AddSpotDescription currentDialogState={currentDialogState} setCurrentDialogState={setCurrentDialogState} />
-                    <AddSpotCategory currentDialogState={currentDialogState} setCurrentDialogState={setCurrentDialogState} />
-                    <AddSpotImages currentDialogState={currentDialogState} setCurrentDialogState={setCurrentDialogState} />
-                </>
-                : <div className='flex flex-row h-full w-full justify-center items-center'><Spinner /></div>
-            }
-        </addSpotFetcher.Form>
-    </div>
+    return (
+        <div className='absolute z-10 flex justify-center items-center' style={{ left: x, top: y }}>
+            <addSpotFetcher.Form
+                method='POST'
+                action='/add-spot'
+                className='bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col justify-between overflow-hidden' 
+                style={{ width: '320px', height: '420px' }}
+            >
+                <input type='hidden' name='lng' value={lng} />
+                <input type='hidden' name='lat' value={lat} />
+                <div className='w-full px-6 py-4 bg-blue-600 dark:bg-blue-500 shadow-sm'>
+                    <h1 className='text-xl font-semibold text-white flex flex-row gap-2 items-center'>
+                        <PlusCircleIcon className="w-5 h-5" />
+                        Add a spot
+                    </h1>
+                </div>
+                {addSpotFetcher.state == 'idle' ?
+                    <>
+                        <AddSpotName currentDialogState={currentDialogState} setCurrentDialogState={setCurrentDialogState} setAddingSpot={setAddingSpot}/>
+                        <AddSpotDescription currentDialogState={currentDialogState} setCurrentDialogState={setCurrentDialogState} />
+                        <AddSpotCategory currentDialogState={currentDialogState} setCurrentDialogState={setCurrentDialogState} />
+                        <AddSpotImages currentDialogState={currentDialogState} setCurrentDialogState={setCurrentDialogState} />
+                    </>
+                    : <div className='flex flex-row h-full w-full justify-center items-center'><Spinner /></div>
+                }
+            </addSpotFetcher.Form>
+        </div>
+    )
 }
 
 function AddSpotName({ currentDialogState, setCurrentDialogState, setAddingSpot }: { currentDialogState: string, setCurrentDialogState: any, setAddingSpot: any }) {
-    return <div className='flex flex-col gap-5 justify-between p-5 h-full items-stretch' style={currentDialogState === 'add-name' ? undefined : { display: 'none' }}>
-        <div className='flex flex-row justify-center items-center h-1/2'>
-            <MapPinIcon size={30} />
-
-        </div>
-        <div className='flex flex-col gap-5 justify-between' style={currentDialogState === 'add-name' ? undefined : { display: 'none' }}>
-            Add a name for your spot
-            <SpotInput placeholder='Name' name='name' />
-            <div className='flex flex-row justify-between'>
-                <SidebarButton type='button' onClick={() => { setAddingSpot('idle') }}><XCircleIcon />Cancel</SidebarButton>
-                <SidebarButton type='button' onClick={() => { setCurrentDialogState('add-description') }}><ArrowRightCircleIcon />Next</SidebarButton>
+    return (
+        <div className='flex flex-col gap-6 justify-between p-6 h-full items-stretch' style={currentDialogState === 'add-name' ? undefined : { display: 'none' }}>
+            <div className='flex flex-col gap-4 items-center justify-center flex-1'>
+                <div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+                    <MapPinIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className='text-lg font-medium text-gray-900 dark:text-white text-center'>
+                    Add a name for your spot
+                </h2>
+            </div>
+            <div className='flex flex-col gap-4'>
+                <SpotInput placeholder='Name' name='name' />
+                <div className='flex flex-row justify-between gap-3'>
+                    <button 
+                        type='button' 
+                        onClick={() => { setAddingSpot('idle') }}
+                        className='flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                    >
+                        <XCircleIcon className="w-4 h-4 inline mr-2" />
+                        Cancel
+                    </button>
+                    <button 
+                        type='button' 
+                        onClick={() => { setCurrentDialogState('add-description') }}
+                        className='flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                    >
+                        <ArrowRightCircleIcon className="w-4 h-4 inline mr-2" />
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    )
 }
 
 function AddSpotDescription({ currentDialogState, setCurrentDialogState }: { currentDialogState: string, setCurrentDialogState: any }) {
-    return <div className='flex flex-col gap-5 justify-between p-5 h-full items-stretch' style={currentDialogState === 'add-description' ? undefined : { display: 'none' }}>
-        <div className='flex flex-row justify-center items-center h-1/2'>
-            <LibraryIcon size={30} />
-
-        </div>
-        <div className='flex flex-col gap-5 justify-between'>
-            Add a description for your spot
-            <SpotInput placeholder='Description' name='description' />
-            <div className='flex flex-row justify-between'>
-                <SidebarButton type='button' onClick={() => { setCurrentDialogState('add-name') }}><ArrowLeftCircleIcon />Previous</SidebarButton>
-                <SidebarButton type='button' onClick={() => { setCurrentDialogState('add-category') }}><ArrowRightCircleIcon />Next</SidebarButton>
+    return (
+        <div className='flex flex-col gap-6 justify-between p-6 h-full items-stretch' style={currentDialogState === 'add-description' ? undefined : { display: 'none' }}>
+            <div className='flex flex-col gap-4 items-center justify-center flex-1'>
+                <div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+                    <LibraryIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className='text-lg font-medium text-gray-900 dark:text-white text-center'>
+                    Add a description for your spot
+                </h2>
+            </div>
+            <div className='flex flex-col gap-4'>
+                <SpotInput placeholder='Description' name='description' />
+                <div className='flex flex-row justify-between gap-3'>
+                    <button 
+                        type='button' 
+                        onClick={() => { setCurrentDialogState('add-name') }}
+                        className='flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                    >
+                        <ArrowLeftCircleIcon className="w-4 h-4 inline mr-2" />
+                        Previous
+                    </button>
+                    <button 
+                        type='button' 
+                        onClick={() => { setCurrentDialogState('add-category') }}
+                        className='flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                    >
+                        <ArrowRightCircleIcon className="w-4 h-4 inline mr-2" />
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    )
 }
 
 function AddSpotCategory({ currentDialogState, setCurrentDialogState }: { currentDialogState: string, setCurrentDialogState: any }) {
-    return <div className='flex flex-col gap-5 justify-between p-5 h-full items-stretch' style={currentDialogState === 'add-category' ? undefined : { display: 'none' }}>
-        <div className='flex flex-row justify-center items-center h-1/2'>
-            <FolderIcon size={30} />
-
-        </div>
-        <div className='flex flex-col gap-5 justify-between'>
-            Add a category for your spot
-            <SpotInput placeholder='Category' />
-            <div className='flex flex-row justify-between'>
-                <SidebarButton type='button' onClick={() => { setCurrentDialogState('add-description') }}><ArrowLeftCircleIcon />Previous</SidebarButton>
-                <SidebarButton type='button' onClick={() => { setCurrentDialogState('add-images') }}><ArrowRightCircleIcon />Next</SidebarButton>
+    return (
+        <div className='flex flex-col gap-6 justify-between p-6 h-full items-stretch' style={currentDialogState === 'add-category' ? undefined : { display: 'none' }}>
+            <div className='flex flex-col gap-4 items-center justify-center flex-1'>
+                <div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+                    <FolderIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className='text-lg font-medium text-gray-900 dark:text-white text-center'>
+                    Add a category for your spot
+                </h2>
+            </div>
+            <div className='flex flex-col gap-4'>
+                <SpotInput placeholder='Category' />
+                <div className='flex flex-row justify-between gap-3'>
+                    <button 
+                        type='button' 
+                        onClick={() => { setCurrentDialogState('add-description') }}
+                        className='flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                    >
+                        <ArrowLeftCircleIcon className="w-4 h-4 inline mr-2" />
+                        Previous
+                    </button>
+                    <button 
+                        type='button' 
+                        onClick={() => { setCurrentDialogState('add-images') }}
+                        className='flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                    >
+                        <ArrowRightCircleIcon className="w-4 h-4 inline mr-2" />
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    )
 }
 
 function AddSpotImages({ currentDialogState, setCurrentDialogState }: { currentDialogState: string, setCurrentDialogState: any }) {
-    return <div className='flex flex-col gap-5 justify-between p-5 h-full items-stretch' style={currentDialogState === 'add-images' ? undefined : { display: 'none' }}>
-        <div className='flex flex-row justify-center items-center h-1/2'>
-            <ImageIcon size={30} />
-
-        </div>
-        <div className='flex flex-col gap-5 justify-between'>
-            Add images for your spot
-            <SpotInput placeholder='Images' />
-            <div className='flex flex-row justify-between'>
-                <SidebarButton type='button' onClick={() => { setCurrentDialogState('add-category') }}><ArrowLeftCircleIcon />Previous</SidebarButton>
-                <SidebarButton type='submit' ><CheckCircleIcon />Add</SidebarButton>
+    return (
+        <div className='flex flex-col gap-6 justify-between p-6 h-full items-stretch' style={currentDialogState === 'add-images' ? undefined : { display: 'none' }}>
+            <div className='flex flex-col gap-4 items-center justify-center flex-1'>
+                <div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+                    <ImageIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className='text-lg font-medium text-gray-900 dark:text-white text-center'>
+                    Add images for your spot
+                </h2>
+            </div>
+            <div className='flex flex-col gap-4'>
+                <SpotInput placeholder='Images' />
+                <div className='flex flex-row justify-between gap-3'>
+                    <button 
+                        type='button' 
+                        onClick={() => { setCurrentDialogState('add-category') }}
+                        className='flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                    >
+                        <ArrowLeftCircleIcon className="w-4 h-4 inline mr-2" />
+                        Previous
+                    </button>
+                    <button 
+                        type='submit'
+                        className='flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                    >
+                        <CheckCircleIcon className="w-4 h-4 inline mr-2" />
+                        Add
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    )
 }
 
 function SpotInput(props: any) {
-    return <input type='text' {...props} className='px-3 py-1 rounded'></input>
+    return (
+        <input 
+            type='text' 
+            {...props} 
+            className='w-full px-4 py-3 text-base rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 dark:focus:border-blue-600 transition-all duration-200' 
+        />
+    )
 }
 
 
 
 function AddSpot({ addingSpot, setAddingSpot }: { addingSpot: string, setAddingSpot: any }) {
-    return addingSpot!='idle' ? null : (<div className='absolute bottom-10 right-10 z-10'>
-        <div className='bg-green-300 border-white border border-2 rounded-full p-5 flex flex-col items-center justify-center' onClick={() => { setAddingSpot('choosing') }}>
-            <PlusIcon />
+    return addingSpot!='idle' ? null : (
+        <div className='absolute bottom-10 right-10 z-10'>
+            <button 
+                className='bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900' 
+                onClick={() => { setAddingSpot('choosing') }}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setAddingSpot('choosing')
+                    }
+                }}
+                aria-label="Add a new spot"
+            >
+                <PlusIcon className="w-6 h-6" />
+            </button>
         </div>
-    </div>
     )
-
 }

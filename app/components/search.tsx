@@ -82,7 +82,11 @@ function SearchResult(result: Spot) {
 
 export function SearchInput({ name, placeholder }: { name: string, placeholder: string }) {
     return (
-        <input type='text' name={name} placeholder={placeholder} 
-        className='w-full mx-auto p-3 text-xl rounded border bg-slate-800 border-slate-300 text-white dark:bg-slate-200 dark:border-slate-400 dark:text-slate-700' />
+        <input 
+            type='text' 
+            name={name} 
+            placeholder={placeholder} 
+            className='w-full px-4 py-3 text-base rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-slate-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 dark:focus:border-blue-600 transition-all duration-200' 
+        />
     )
 }
